@@ -1,347 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-
-    <meta name="theme-color" content="#182b45">
-
-    <title>Mountain Rush - Impossible Hills</title>
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#182b45">
+<title>Mountain Rush — Endless Hills</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
 <div class="game-shell">
+  <header class="hud">
+    <div class="brand">
+      <div class="brand-icon">🏔️</div>
+      <div>
+        <div class="brand-title">MOUNTAIN RUSH</div>
+        <div class="brand-subtitle">ENDLESS HILLS</div>
+      </div>
+    </div>
 
-    <!-- =========================
-         HUD
-    ========================== -->
+    <div class="hud-stats">
+      <div class="stat"><span class="stat-icon">📏</span><div><small>DISTANCE</small><strong><span id="distance">0</span> m</strong></div></div>
+      <div class="stat"><span class="stat-icon">🏆</span><div><small>SCORE</small><strong id="score">0</strong></div></div>
+      <div class="stat"><span class="stat-icon">🪙</span><div><small>COINS</small><strong id="coins">0</strong></div></div>
+      <div class="stat fuel-stat"><span class="stat-icon">⛽</span><div class="fuel-content"><small>FUEL</small><div class="fuel-bar"><div id="fuelBar"></div></div></div></div>
+      <div class="nitro-stat"><small>NITRO</small><div class="nitro-bar"><div id="nitroBar"></div></div><span id="nitroText">READY</span></div>
+      <button id="pauseButton" class="icon-button" aria-label="Pause">⏸</button>
+    </div>
+  </header>
 
-    <header class="hud">
+  <main class="game-area">
+    <canvas id="gameCanvas"></canvas>
 
-        <div class="brand">
-            <div class="brand-icon">🏔️</div>
+    <div id="checkpointToast" class="checkpoint-toast hidden">CHECKPOINT!</div>
 
-            <div>
-                <div class="brand-title">MOUNTAIN RUSH</div>
-                <div class="brand-subtitle">IMPOSSIBLE HILLS</div>
-            </div>
+    <div id="stageNotification" class="stage-notification hidden">
+      <div class="stage-label">STAGE REACHED</div>
+      <div id="stageNumber">STAGE 1</div>
+      <div class="stage-small">The hills are getting tougher.</div>
+    </div>
+
+    <section id="startScreen" class="overlay">
+      <div class="menu-card">
+        <div class="logo-car">🚙</div>
+        <h1>Mountain Rush</h1>
+        <p class="menu-subtitle">ENDLESS HILLS</p>
+        <p class="description">Master the slopes, balance the car in the air, collect coins, save fuel and use nitro at the right moment.</p>
+        <div class="control-grid">
+          <div><b>🚗 GAS</b><span>D / → / ↑</span></div>
+          <div><b>🛑 BRAKE</b><span>A / ← / ↓</span></div>
+          <div><b>↶ AIR ROTATE</b><span>W / A</span></div>
+          <div><b>↷ AIR ROTATE</b><span>S / D</span></div>
+          <div><b>💨 NITRO</b><span>SPACE</span></div>
+          <div><b>⏸ PAUSE</b><span>P / ESC</span></div>
         </div>
+        <button id="startButton" class="primary-button">🚗 START RUSH</button>
+      </div>
+    </section>
 
+    <section id="pauseScreen" class="overlay hidden">
+      <div class="menu-card small-card">
+        <div class="big-icon">⏸️</div>
+        <h2>GAME PAUSED</h2>
+        <p>The mountain is waiting.</p>
+        <button id="resumeButton" class="primary-button">▶ RESUME</button>
+      </div>
+    </section>
 
-        <div class="hud-stats">
-
-            <div class="stat">
-                <span class="stat-icon">📏</span>
-                <div>
-                    <small>DISTANCE</small>
-                    <strong>
-                        <span id="distance">0</span> m
-                    </strong>
-                </div>
-            </div>
-
-
-            <div class="stat">
-                <span class="stat-icon">🏆</span>
-                <div>
-                    <small>SCORE</small>
-                    <strong id="score">0</strong>
-                </div>
-            </div>
-
-
-            <div class="stat">
-                <span class="stat-icon">🪙</span>
-                <div>
-                    <small>COINS</small>
-                    <strong id="coins">0</strong>
-                </div>
-            </div>
-
-
-            <div class="stat fuel-stat">
-                <span class="stat-icon">⛽</span>
-
-                <div class="fuel-content">
-                    <small>FUEL</small>
-
-                    <div class="fuel-bar">
-                        <div id="fuelBar"></div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="nitro-stat">
-                <small>NITRO</small>
-
-                <div class="nitro-bar">
-                    <div id="nitroBar"></div>
-                </div>
-
-                <span id="nitroText">READY</span>
-            </div>
-
-
-            <button
-                id="pauseButton"
-                class="icon-button"
-                aria-label="Pause"
-            >
-                ⏸
-            </button>
-
+    <section id="crashScreen" class="overlay hidden">
+      <div class="menu-card small-card">
+        <div class="big-icon">💥</div>
+        <h2 id="crashTitle">CRASH!</h2>
+        <p id="crashMessage" class="crash-message">Keep the car balanced.</p>
+        <div class="results">
+          <div><span>Distance</span><strong><span id="finalDistance">0</span> m</strong></div>
+          <div><span>Coins</span><strong id="finalCoins">0</strong></div>
+          <div><span>Score</span><strong id="finalScore">0</strong></div>
+          <div><span>Stage</span><strong id="finalStage">1</strong></div>
         </div>
-
-    </header>
-
-
-    <!-- =========================
-         GAME
-    ========================== -->
-
-    <main class="game-area">
-
-        <canvas id="gameCanvas"></canvas>
-
-
-        <!-- Stage notification -->
-
-        <div
-            id="stageNotification"
-            class="stage-notification hidden"
-        >
-            <div class="stage-label">STAGE COMPLETE</div>
-            <div id="stageNumber">STAGE 1</div>
-            <div class="stage-small">
-                Keep driving!
-            </div>
-        </div>
-
-
-        <!-- Start screen -->
-
-        <section
-            id="startScreen"
-            class="overlay"
-        >
-
-            <div class="menu-card">
-
-                <div class="logo-car">🚙</div>
-
-                <h1>Mountain Rush</h1>
-
-                <p class="menu-subtitle">
-                    IMPOSSIBLE HILLS
-                </p>
-
-                <p class="description">
-                    Drive as far as possible, collect coins,
-                    refuel your car and master the hills.
-                </p>
-
-
-                <div class="control-grid">
-
-                    <div>
-                        <b>🚗 DRIVE</b>
-                        <span>D / →</span>
-                    </div>
-
-                    <div>
-                        <b>🛑 BRAKE</b>
-                        <span>A / ←</span>
-                    </div>
-
-                    <div>
-                        <b>↶ ROTATE</b>
-                        <span>W / ↑</span>
-                    </div>
-
-                    <div>
-                        <b>↷ ROTATE</b>
-                        <span>S / ↓</span>
-                    </div>
-
-                    <div>
-                        <b>💨 NITRO</b>
-                        <span>SPACE</span>
-                    </div>
-
-                    <div>
-                        <b>⏸ PAUSE</b>
-                        <span>P / ESC</span>
-                    </div>
-
-                </div>
-
-
-                <button
-                    id="startButton"
-                    class="primary-button"
-                >
-                    🚗 START RUSH
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- Pause screen -->
-
-        <section
-            id="pauseScreen"
-            class="overlay hidden"
-        >
-
-            <div class="menu-card small-card">
-
-                <div class="big-icon">⏸️</div>
-
-                <h2>GAME PAUSED</h2>
-
-                <p>
-                    Take a breath. The mountain is waiting.
-                </p>
-
-                <button
-                    id="resumeButton"
-                    class="primary-button"
-                >
-                    ▶ RESUME
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- Crash screen -->
-
-        <section
-            id="crashScreen"
-            class="overlay hidden"
-        >
-
-            <div class="menu-card small-card">
-
-                <div class="big-icon">💥</div>
-
-                <h2>CRASH!</h2>
-
-                <p class="crash-message">
-                    That landing was a little too ambitious.
-                </p>
-
-
-                <div class="results">
-
-                    <div>
-                        <span>Distance</span>
-                        <strong>
-                            <span id="finalDistance">0</span> m
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Coins</span>
-                        <strong id="finalCoins">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Score</span>
-                        <strong id="finalScore">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Stage</span>
-                        <strong id="finalStage">1</strong>
-                    </div>
-
-                </div>
-
-
-                <button
-                    id="restartButton"
-                    class="primary-button"
-                >
-                    🔄 PLAY AGAIN
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- Mobile controls -->
-
-        <div
-            id="mobileControls"
-            class="mobile-controls"
-        >
-
-            <button
-                id="leftTouch"
-                class="touch-button"
-            >
-                ◀
-            </button>
-
-            <button
-                id="nitroTouch"
-                class="touch-button nitro-touch"
-            >
-                ⚡
-            </button>
-
-            <button
-                id="rightTouch"
-                class="touch-button"
-            >
-                ▶
-            </button>
-
-        </div>
-
-    </main>
-
-
-    <!-- =========================
-         BOTTOM INFO
-    ========================== -->
-
-    <footer class="bottom-bar">
-
-        <div>
-            CHECKPOINT:
-            <strong id="checkpointText">1000 m</strong>
-        </div>
-
-        <div>
-            STAGE:
-            <strong id="stageText">1</strong>
-        </div>
-
-        <div>
-            BEST:
-            <strong id="bestText">0 m</strong>
-        </div>
-
-    </footer>
-
+        <button id="restartButton" class="primary-button">🔄 PLAY AGAIN</button>
+      </div>
+    </section>
+
+    <div class="mobile-controls" aria-label="Touch controls">
+      <button id="leftTouch" class="touch-button brake-touch"><span>◀</span><small>BRAKE</small></button>
+      <div class="mobile-center">
+        <button id="nitroTouch" class="touch-button nitro-touch"><span>⚡</span><small>NITRO</small></button>
+      </div>
+      <button id="rightTouch" class="touch-button gas-touch"><span>▶</span><small>GAS</small></button>
+    </div>
+
+    <div class="vehicle-meter" aria-hidden="true">
+      <div class="meter-title">RPM</div>
+      <div class="meter">
+        <div class="meter-ticks"></div>
+        <div id="rpmNeedle" class="needle"></div>
+        <div class="meter-center"></div>
+      </div>
+      <div class="meter-speed"><span id="speedValue">0</span><small>KM/H</small></div>
+    </div>
+  </main>
+
+  <footer class="bottom-bar">
+    <div>CHECKPOINT: <strong id="checkpointText">1000 m</strong></div>
+    <div>STAGE: <strong id="stageText">1</strong></div>
+    <div>BEST: <strong id="bestText">0 m</strong></div>
+  </footer>
 </div>
-
-
 <script src="game.js"></script>
-
 </body>
 </html>
